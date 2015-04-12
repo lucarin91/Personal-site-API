@@ -5,14 +5,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
-
-
-var routes = require('./routes/index');
-var users = require('./routes/users');
-var curriculum = require('./routes/curriculum');
-var me = require('./routes/me');
-var projects = require('./routes/projects');
-var skills = require('./routes/skills');
+var passport = require('passport');
+var ejs = require('ejs');
 
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://mongo/personal', function(err) {
@@ -28,24 +22,29 @@ var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+//app.set('view engine', 'ejs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+// Use the passport package in our application
+app.use(passport.initialize());
 app.use(session({secret:'askjdhaskdjh',
                  resave:true,
                  saveUninitialized:true}));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
-app.use('/users', users);
-app.use('/me', me);
-app.use('/projects', projects);
-app.use('/skills', skills);
-app.use('/curriculum', curriculum);
+app.use('/', require('./routes/index'));
+app.use('/users', require('./routes/users'));
+app.use('/me', require('./routes/me'));
+app.use('/projects', require('./routes/projects'));
+app.use('/skills', require('./routes/skills'));
+app.use('/curriculum', require('./routes/curriculum'));
+app.use('/oauth2', require('./routes/oauth2'));
+app.use('/client', require('./routes/client'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -1,32 +1,30 @@
 var express = require('express');
 var router = express.Router();
 var authController = require('../controllers/auth');
+
 var mongoose = require('mongoose');
-var Me = require('../models/Me.js');
+var Client = require('../models/Client.js');
 
 /* GET /users listing. */
 router.get('/', authController.isAuthenticated, function(req, res, next) {
-  Me.find(function (err, todos) {
+  Client.find(function (err, todos) {
     if (err) return next(err);
     res.json(todos);
   });
 });
 
 /* POST /users */
-router.post('/', function(req, res, next) {
-  Me.create(req.body, function (err, post) {
-    console.log('post');
-    if (err) {
-      console.log('error');
-      return next(err);
-    }
+router.post('/', authController.isAuthenticated, function(req, res, next) {
+  console.log(req.body);
+  Client.create(req.body, function (err, post) {
+    if (err) return next(err);
     res.json(post);
   });
 });
 
 /* GET /users/:id */
 router.get('/:id', function(req, res, next) {
-  Me.findById(req.params.id, function (err, post) {
+  Client.findById(req.params.id, function (err, post) {
     if (err) return next(err);
     res.json(post);
   });
@@ -34,7 +32,7 @@ router.get('/:id', function(req, res, next) {
 
 /* PUT /users/:id */
 router.put('/:id', function(req, res, next) {
-  Me.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
+  Client.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);
   });
@@ -42,7 +40,7 @@ router.put('/:id', function(req, res, next) {
 
 /* DELETE /users/:id */
 router.delete('/:id', function(req, res, next) {
-  Me.findByIdAndRemove(req.params.id, req.body, function (err, post) {
+  Client.findByIdAndRemove(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);
   });

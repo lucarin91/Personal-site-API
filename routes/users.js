@@ -1,11 +1,12 @@
 var express = require('express');
 var router = express.Router();
+var authController = require('../controllers/auth');
 
 var mongoose = require('mongoose');
 var Users = require('../models/Users.js');
 
 /* GET /users listing. */
-router.get('/', function(req, res, next) {
+router.get('/', authController.isAuthenticated, function(req, res, next) {
   Users.find(function (err, todos) {
     if (err) return next(err);
     res.json(todos);
