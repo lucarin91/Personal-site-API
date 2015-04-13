@@ -4,45 +4,25 @@ var authController = require('../controllers/auth');
 var mongoose = require('mongoose');
 var Me = require('../models/Me.js');
 
-/* GET /users listing. */
-router.get('/', authController.isAuthenticated, function(req, res, next) {
-  Me.find(function (err, todos) {
+/* GET /me listing. */
+router.get('/', function(req, res, next) {
+  Me.find({user:req.userId}, function (err, todos) {
     if (err) return next(err);
     res.json(todos);
   });
 });
 
-/* POST /users */
-router.post('/', function(req, res, next) {
-  Me.create(req.body, function (err, post) {
-    console.log('post');
-    if (err) {
-      console.log('error');
-      return next(err);
-    }
+/* POST /me */
+router.post('/', authController.isAuthenticated, function(req, res, next) {
+  req.body.user=req.user._id;
+  Me.update({user:req.user._id}, req.body, {upsert:true}, function (err, post) {
+    if (err)return next(err);
     res.json(post);
   });
 });
 
-/* GET /users/:id */
-router.get('/:id', function(req, res, next) {
-  Me.findById(req.params.id, function (err, post) {
-    if (err) return next(err);
-    res.json(post);
-  });
-});
-
-/* PUT /users/:id */
-router.put('/:id', function(req, res, next) {
-  Me.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
-    if (err) return next(err);
-    res.json(post);
-  });
-});
-
-/* DELETE /users/:id */
-router.delete('/:id', function(req, res, next) {
-  Me.findByIdAndRemove(req.params.id, req.body, function (err, post) {
+router.delete('/', authController.isAuthenticated, function(req, res, next) {
+  Me.remove({user:req.user._id}, function (err, post) {
     if (err) return next(err);
     res.json(post);
   });

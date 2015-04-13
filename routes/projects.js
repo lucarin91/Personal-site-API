@@ -1,44 +1,29 @@
 var express = require('express');
 var router = express.Router();
-
+var authController = require('../controllers/auth');
 var mongoose = require('mongoose');
 var Projects = require('../models/Projects.js');
 
-/* GET /users listing. */
+/* GET /projects listing. */
 router.get('/', function(req, res, next) {
-  Projects.find(function (err, todos) {
+  Projects.find({user:req.userId}, function (err, todos) {
     if (err) return next(err);
     res.json(todos);
   });
 });
 
-/* POST /users */
-router.post('/', function(req, res, next) {
-  Projects.create(req.body, function (err, post) {
+/* POST /projects */
+router.post('/', authController.isAuthenticated, function(req, res, next) {
+  req.body.user = req.user._id;
+  Projects.update({user:req.user._id}, req.body, {upsert:true}, function (err, post) {
     if (err) return next(err);
     res.json(post);
   });
 });
 
-/* GET /users/:id */
-router.get('/:id', function(req, res, next) {
-  Projects.findById(req.params.id, function (err, post) {
-    if (err) return next(err);
-    res.json(post);
-  });
-});
-
-/* PUT /users/:id */
-router.put('/:id', function(req, res, next) {
-  Projects.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
-    if (err) return next(err);
-    res.json(post);
-  });
-});
-
-/* DELETE /users/:id */
-router.delete('/:id', function(req, res, next) {
-  Projects.findByIdAndRemove(req.params.id, req.body, function (err, post) {
+/* DELETE /projects */
+router.delete('/', authController.isAuthenticated, function(req, res, next) {
+  Projects.remove({user:req.user._id}, function (err, post) {
     if (err) return next(err);
     res.json(post);
   });

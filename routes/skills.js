@@ -1,44 +1,29 @@
 var express = require('express');
 var router = express.Router();
-
+var authController = require('../controllers/auth');
 var mongoose = require('mongoose');
 var Skills = require('../models/Skills.js');
 
-/* GET /users listing. */
+/* GET /skills listing. */
 router.get('/', function(req, res, next) {
-  Skills.find(function (err, todos) {
+  Skills.find({user:req.userId}, function (err, todos) {
     if (err) return next(err);
     res.json(todos);
   });
 });
 
-/* POST /users */
-router.post('/', function(req, res, next) {
-  Skills.create(req.body, function (err, post) {
+/* POST /skills */
+router.post('/', authController.isAuthenticated, function(req, res, next) {
+  req.body.user = req.user._id;
+  Skills.update({user:req.user._id}, req.body, {upsert:true}, function (err, post) {
     if (err) return next(err);
     res.json(post);
   });
 });
 
-/* GET /users/:id */
-router.get('/:id', function(req, res, next) {
-  Skills.findById(req.params.id, function (err, post) {
-    if (err) return next(err);
-    res.json(post);
-  });
-});
-
-/* PUT /users/:id */
-router.put('/:id', function(req, res, next) {
-  Skills.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
-    if (err) return next(err);
-    res.json(post);
-  });
-});
-
-/* DELETE /users/:id */
-router.delete('/:id', function(req, res, next) {
-  Skills.findByIdAndRemove(req.params.id, req.body, function (err, post) {
+/* DELETE /skills */
+router.delete('/', authController.isAuthenticated, function(req, res, next) {
+  Skills.remove({user:req.user._id}, function (err, post) {
     if (err) return next(err);
     res.json(post);
   });

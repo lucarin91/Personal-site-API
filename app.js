@@ -29,6 +29,7 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+// parse application/json
 app.use(cookieParser());
 // Use the passport package in our application
 app.use(passport.initialize());
@@ -37,13 +38,18 @@ app.use(session({secret:'askjdhaskdjh',
                  saveUninitialized:true}));
 app.use(express.static(path.join(__dirname, 'public')));
 
+function parseUserId(req,res,next){
+  req.userId=req.params.id;
+  console.log('id '+req.user_id);
+  next();
+}
 app.use('/', require('./routes/index'));
 app.use('/users', require('./routes/users'));
-app.use('/me', require('./routes/me'));
-app.use('/projects', require('./routes/projects'));
-app.use('/skills', require('./routes/skills'));
-app.use('/curriculum', require('./routes/curriculum'));
-app.use('/oauth2', require('./routes/oauth2'));
+app.use('/:id/me', parseUserId, require('./routes/me'));
+app.use('/:id/projects', parseUserId, require('./routes/projects'));
+app.use('/:id/skills', parseUserId, require('./routes/skills'));
+app.use('/:id/curriculum', parseUserId, require('./routes/curriculum'));
+app.use('/:id/oauth2', require('./routes/oauth2'));
 app.use('/client', require('./routes/client'));
 
 // catch 404 and forward to error handler
