@@ -15,10 +15,44 @@ router.get('/', function(req, res, next) {
 /* POST /skills */
 router.post('/', authController.isAuthenticated, function(req, res, next) {
   req.body.user = req.user._id;
-  Skills.update({user:req.user._id}, req.body, {upsert:true}, function (err, post) {
+  Skills.create(req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);
   });
+});
+
+/* POST /skills/:name */
+router.post('/:name', authController.isAuthenticated, function(req, res, next) {
+  if (req.body.name) next({message:'no name found'});
+  req.body.user = req.user._id;
+  Skills.update({
+                  _id:req.user.id,
+                  name:req.params.name,
+                  'items.name': { $ne: req.body.name }
+                },{
+                  $addToSet: {items: req.body}
+                },
+                function (err, post) {
+                  if (err) return next(err);
+                  res.json(post);
+                });
+});
+
+/* POST /skills/:name */
+router.put('/:name', authController.isAuthenticated, function(req, res, next) {
+  if (req.body.name) next({message:'no name found'});
+  req.body.user = req.user._id;
+  Skills.update({
+                  _id:req.user.id,
+                  name:req.params.name,
+                  'items.name': req.body.name
+                },{
+                  $set: {'items.$': req.body}
+                },
+                function (err, post) {
+                  if (err) return next(err);
+                  res.json(post);
+                });
 });
 
 /* DELETE /skills */

@@ -20,6 +20,7 @@ router.post('/', authController.isAuthenticated, function(req, res, next) {
     res.json(post);
   });
 });
+
 /* DELETE /curriculum */
 router.delete('/', authController.isAuthenticated, function(req, res, next) {
   Curriculum.remove({user:req.user._id}, function (err, post) {
