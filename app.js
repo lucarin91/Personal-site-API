@@ -8,16 +8,34 @@ var session = require('express-session');
 var passport = require('passport');
 var ejs = require('ejs');
 
+var app = express();
+
+
+// development only
+if ('development' == app.get('env')) {
+  console.log("development");
+  app.set('mongodb_uri', 'mongo');
+}
+
+// production only
+if ('production' == app.get('env')) {
+  console.log("production");
+  app.set('mongodb_uri', 'localhost');
+}
+
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://mongo/personal', function(err) {
+mongoose.connect('mongodb://'+app.get('mongodb_uri')+'/personal', function(err) {
     if(err) {
         console.log('connection error', err);
+
     } else {
         console.log('connection successful');
+        var Users = require('./models/Users.js');
+        Users.create({username:'luca',password:'dio'}, function(err,data){
+          if(!err) console.log(data._id);
+        });
     }
 });
-
-var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -85,3 +103,5 @@ app.use(function(err, req, res, next) {
 
 
 module.exports = app;
+
+var server = app.listen();

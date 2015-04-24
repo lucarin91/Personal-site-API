@@ -15,9 +15,18 @@ router.get('/', function(req, res, next) {
 /* POST /projects */
 router.post('/', authController.isAuthenticated, function(req, res, next) {
   req.body.user = req.user._id;
-  Projects.update({user:req.user._id}, req.body, {upsert:true}, function (err, post) {
+  Projects.create(req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);
+  });
+});
+
+/* POST /projects/:id */
+router.post('/:name', authController.isAuthenticated, function(req, res, next) {
+  if (req.body.name===undefined) next({message:'need name field'});
+  Projects.update({name:req.params.name},{$addToSet: {items: req.body}},{safe: true}, function(err,num,data){
+    if (err) return next(err);
+    res.json(data);
   });
 });
 
